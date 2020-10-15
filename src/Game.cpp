@@ -1,21 +1,16 @@
 #include "Game.hpp"
 #include "TextureManager.hpp"
 #include "GameObject.hpp"
-// #include "Map.hpp"
 #include "ECS/Components.hpp"
 #include "Vector2D.hpp"
 #include "Collision.hpp"
 
-// Map *map;
 Manager manager;
 
 SDL_Renderer *Game::renderer = nullptr;
 SDL_Event Game::event;
 
 std::vector<BoxColliderComponent *> Game::colliders;
-
-// auto &player(manager.addEntity());
-// auto &wall(manager.addEntity());
 
 enum groupLabels : std::size_t
 {
@@ -90,8 +85,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
   //   std::cout << "SDL_image initialized!" << std::endl;
   // }
 
-  // map = new Map();
-
   // ECS implementation
   Game::AddBox(400.0f, 100.0f);
 }
@@ -124,10 +117,6 @@ void Game::handleEvents()
   default:
     break;
   }
-
-  // if (SDL_GetMouseState(&mouseX, &mouseY) & SDL_MOUSEBUTTONDOWN(SDL_BUTTON_LEFT))
-  // {
-  // }
 }
 
 void Game::update()
@@ -153,21 +142,16 @@ void Game::update()
     {
       cc->transform->position.y = height - 32.0f;
       cc->transform->velocity.y = 0.0f;
-      // cc->entity.getComponent<PhysicsBoxComponent>()
     }
-    // Collision::AABB(player.getComponent<ColliderComponent>(), *cc);
   }
 }
 
 auto &physics(manager.getGroup(groupPhysics));
-// auto &tiles(manager.getGroup(groupMap));
-// auto &players(manager.getGroup(groupPlayers));
-// auto &enemies(manager.getGroup(groupEnemies));
 
 void Game::render()
 {
   SDL_RenderClear(renderer);
-  // manager.draw();
+
   int i = 0;
   for (auto &t : physics)
   {
@@ -186,13 +170,6 @@ void Game::clean()
   SDL_Quit();
   std::cout << "Game Cleaned" << std::endl;
 }
-
-// void Game::AddTile(int id, int x, int y)
-// {
-//   auto &tile(manager.addEntity());
-//   tile.addComponent<TileComponent>(x, y, 32, 32, id);
-//   // tile.addGroup(groupMap);
-// }
 
 void Game::AddBox(float x, float y)
 {
