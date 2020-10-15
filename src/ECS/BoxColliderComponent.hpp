@@ -1,11 +1,11 @@
-#ifndef ColliderComponent_hpp
-#define ColliderComponent_hpp
+#ifndef BoxColliderComponent_hpp
+#define BoxColliderComponent_hpp
 
 #include <string>
 #include "SDL2/SDL.h"
 #include "Components.hpp"
 
-class ColliderComponent : public Component
+class BoxColliderComponent : public Component
 {
 public:
   SDL_Rect collider;
@@ -13,17 +13,19 @@ public:
 
   TransformComponent *transform;
 
-  ColliderComponent(std::string t)
+  BoxColliderComponent() = default;
+
+  BoxColliderComponent(std::string t)
   {
     tag = t;
   }
 
   void init() override
   {
-    if (!entity->hasComponent<TransformComponent>())
-    {
-      entity->addComponent<TransformComponent>();
-    }
+    // if (!entity->hasComponent<TransformComponent>())
+    // {
+    //   entity->addComponent<TransformComponent>();
+    // }
     transform = &entity->getComponent<TransformComponent>();
 
     Game::colliders.push_back(this);
@@ -33,9 +35,9 @@ public:
   {
     collider.x = static_cast<int>(transform->position.x);
     collider.y = static_cast<int>(transform->position.y);
-    collider.w = static_cast<int>(transform->width * transform->scale);
-    collider.h = static_cast<int>(transform->height * transform->scale);
+    collider.w = static_cast<int>(transform->width);
+    collider.h = static_cast<int>(transform->height);
   }
 };
 
-#endif /* ColliderComponent_hpp */
+#endif /* BoxColliderComponent */

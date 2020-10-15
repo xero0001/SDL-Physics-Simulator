@@ -28,3 +28,7 @@ Here's starter code of SDL2 for VSCode and Windows 10 user.
 <!-- https://www.youtube.com/watch?v=NZHzgXFKfuY -->
 
 <!-- https://www.youtube.com/watch?v=Te_TBymgW4k -->
+
+<!-- https://www.youtube.com/watch?v=NmqpzyeI6ZM -->
+
+<!-- https://www.youtube.com/user/shiffman -->

@@ -1,28 +1,25 @@
 #include "Game.hpp"
 #include "TextureManager.hpp"
 #include "GameObject.hpp"
-#include "Map.hpp"
+// #include "Map.hpp"
 #include "ECS/Components.hpp"
 #include "Vector2D.hpp"
 #include "Collision.hpp"
 
-Map *map;
+// Map *map;
 Manager manager;
 
 SDL_Renderer *Game::renderer = nullptr;
 SDL_Event Game::event;
 
-std::vector<ColliderComponent *> Game::colliders;
+std::vector<BoxColliderComponent *> Game::colliders;
 
-auto &player(manager.addEntity());
-auto &wall(manager.addEntity());
+// auto &player(manager.addEntity());
+// auto &wall(manager.addEntity());
 
 enum groupLabels : std::size_t
 {
-  groupMap,
-  groupPlayers,
-  groupEnemies,
-  groupColliders,
+  groupPhysics,
 };
 
 Game::Game()
@@ -41,6 +38,10 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
   {
     flags |= SDL_WINDOW_FULLSCREEN;
   }
+
+  // Save windo information
+  this->width = width;
+  this->height = height;
 
   // Check if Initialize successful
   if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
@@ -78,33 +79,21 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
   }
 
   // Check SDL_image
-  if (!IMG_Init(IMG_INIT_PNG))
-  {
-    std::cout << "SDL_image could not initialize! SDL_image Error:" << std::endl
-              << IMG_GetError() << std::endl;
-    isRunning = false;
-  }
-  else
-  {
-    std::cout << "SDL_image initialized!" << std::endl;
-  }
+  // if (!IMG_Init(IMG_INIT_PNG))
+  // {
+  //   std::cout << "SDL_image could not initialize! SDL_image Error:" << std::endl
+  //             << IMG_GetError() << std::endl;
+  //   isRunning = false;
+  // }
+  // else
+  // {
+  //   std::cout << "SDL_image initialized!" << std::endl;
+  // }
 
-  map = new Map();
+  // map = new Map();
 
   // ECS implementation
-
-  Map::LoadMap("assets/p16x16.map", 16, 16);
-
-  player.addComponent<TransformComponent>(2);
-  player.addComponent<SpriteComponent>("assets/player_anims.png", true);
-  player.addComponent<KeyboardController>();
-  player.addComponent<ColliderComponent>("player");
-  player.addGroup(groupPlayers);
-
-  wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
-  wall.addComponent<SpriteComponent>("assets/dirt.png");
-  wall.addComponent<ColliderComponent>("wall");
-  wall.addGroup(groupMap);
+  Game::AddBox(400.0f, 100.0f);
 }
 
 void Game::handleEvents()
@@ -116,9 +105,29 @@ void Game::handleEvents()
   case SDL_QUIT:
     isRunning = false;
     break;
+  case SDL_MOUSEBUTTONDOWN:
+    if (pressed == false)
+    {
+      pressed = true;
+      int mouseX;
+      int mouseY;
+      SDL_GetMouseState(&mouseX, &mouseY);
+      Game::AddBox((float)mouseX, (float)mouseY);
+    }
+    break;
+  case SDL_MOUSEBUTTONUP:
+    if (pressed == true)
+    {
+      pressed = false;
+    }
+    break;
   default:
     break;
   }
+
+  // if (SDL_GetMouseState(&mouseX, &mouseY) & SDL_MOUSEBUTTONDOWN(SDL_BUTTON_LEFT))
+  // {
+  // }
 }
 
 void Game::update()
@@ -126,32 +135,47 @@ void Game::update()
   manager.refresh();
   manager.update();
 
+  for (auto c1 = colliders.begin(); c1 != colliders.end(); ++c1)
+  {
+    for (auto c2 = c1 + 1; c2 != colliders.end(); ++c2)
+    {
+      if (Collision::AABB(*(*c1), *(*c2)))
+      {
+        (*c2)->transform->position.y = (*c1)->transform->position.y - 32.0f;
+        (*c2)->transform->velocity.y = 0.0f;
+      }
+    }
+  }
+
   for (auto cc : colliders)
   {
-    Collision::AABB(player.getComponent<ColliderComponent>(), *cc);
+    if (cc->collider.y + cc->collider.h > height)
+    {
+      cc->transform->position.y = height - 32.0f;
+      cc->transform->velocity.y = 0.0f;
+      // cc->entity.getComponent<PhysicsBoxComponent>()
+    }
+    // Collision::AABB(player.getComponent<ColliderComponent>(), *cc);
   }
 }
 
-auto &tiles(manager.getGroup(groupMap));
-auto &players(manager.getGroup(groupPlayers));
-auto &enemies(manager.getGroup(groupEnemies));
+auto &physics(manager.getGroup(groupPhysics));
+// auto &tiles(manager.getGroup(groupMap));
+// auto &players(manager.getGroup(groupPlayers));
+// auto &enemies(manager.getGroup(groupEnemies));
 
 void Game::render()
 {
   SDL_RenderClear(renderer);
   // manager.draw();
-  for (auto &t : tiles)
+  int i = 0;
+  for (auto &t : physics)
   {
+    i++;
     t->draw();
   }
-  for (auto &p : players)
-  {
-    p->draw();
-  }
-  for (auto &e : enemies)
-  {
-    e->draw();
-  }
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderPresent(renderer);
 }
 
@@ -163,9 +187,16 @@ void Game::clean()
   std::cout << "Game Cleaned" << std::endl;
 }
 
-void Game::AddTile(int id, int x, int y)
+// void Game::AddTile(int id, int x, int y)
+// {
+//   auto &tile(manager.addEntity());
+//   tile.addComponent<TileComponent>(x, y, 32, 32, id);
+//   // tile.addGroup(groupMap);
+// }
+
+void Game::AddBox(float x, float y)
 {
-  auto &tile(manager.addEntity());
-  tile.addComponent<TileComponent>(x, y, 32, 32, id);
-  tile.addGroup(groupMap);
+  auto &box(manager.addEntity());
+  box.addComponent<PhysicsBoxComponent>(x, y, 32, 32);
+  box.addGroup(groupPhysics);
 }

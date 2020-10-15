@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 
   // Create new game object and initialize
   game = new Game();
-  game->init("16 Multiple Animations and Render Flipping", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, false);
+  game->init("AABB Check", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, false);
 
   while (game->running())
   {
